@@ -5,6 +5,7 @@ import pygame
 from random import randint
 import numpy as np
 import time
+import random
 
 class Simulator2:
 
@@ -39,7 +40,10 @@ class Simulator2:
 		self.grid = [ [0 for x in range(grids_x)] for y in range(grids_y) ]
 		self.gridValue = np.asarray( [ [0 for x in range(self.GRIDS_X)] for y in range(self.GRIDS_Y) ] )
 		self.simulate = simulate
-		
+		self.iter = 0
+		self.generateStartPoint()
+		self.updateGrid()
+
 	def generateObstacles(self):
 		obstacleSet = set()
 		# generate obstacles
@@ -199,45 +203,6 @@ class Simulator2:
 		return False
 
 
-	##################### SARS structure #####################
-	# return state with location of drone and target [ droneLocation, targetLocatoin, face and faceangle ]
-	def getState(self):
-		return [(self.drone.x,self.drone.y),(self.target.x,self.target.y) ,( self.target.face, self.target.faceAngle)]
-
-	# get possible next action
-	def getAction(self,state):
-		self.drone.x, self.drone.y = state[0]
-		return self.drone.possibleActions(self.GRIDS_X,self.GRIDS_Y)
-
-	# drone' move is for sure. assume target move randomly
-	def getPossibility(self,state,action,nextState):
-		return 1.0/len(self.target.possibleActions(self.GRIDS_X,self.GRIDS_Y))
-
-	# get every possible next state and reward
-	def getNextStateAndReward(self,state,action):
-		self.drone.x, self.drone.y = state[0]
-		self.drone.AImove(action)
-		droneState = (self.drone.x, self.drone.y)
-		nextStates = []
-		rewards = []
-		for act in self.target.possibleActions(self.GRIDS_X,self.GRIDS_Y):
-			self.target.AImove(act)
-			self.computeValue()
-			reward = self.gridValue[self.drone.y][self.drone.x]
-			state = [droneState, (self.target.x,self.target.y), (self.target.face, self.target.faceAngle)]
-			nextStates.append(state)
-			rewards.append(reward)
-			self.target.undo()
-		self.drone.undo()
-		return nextStates,rewards
-
-		
-
-	
-
-
-	##################### SARS structure End#####################
-
 	def start(self):
 		pygame.init()
 		screen = self.canvas()
@@ -263,7 +228,8 @@ class Simulator2:
 			print (self.gridValue,'\n')
 		pygame.quit()
 
-	def SARS(self):
+
+	def simulation(self):
 		pygame.init()
 		screen = self.canvas()
 		default_font = pygame.font.Font(None, 28)
@@ -272,6 +238,7 @@ class Simulator2:
 		lastMoveTime = start_time
 		clock = pygame.time.Clock()
 		
+
 		# Loop until the user clicks the close button.
 		done = False
 		self.updateGrid()
@@ -312,11 +279,92 @@ class Simulator2:
 
 
 
+	##################### SARS structure #####################
+	# return state with location of drone and target [ droneLocation, targetLocatoin, face and faceangle ]
+	def getState(self):
+		return [(self.drone.x,self.drone.y),(self.target.x,self.target.y) ,( self.target.face, self.target.faceAngle)]
+
+	# get possible next action
+	def getAction(self,state):
+		self.drone.x, self.drone.y = state[0]
+		return self.drone.possibleActions(self.GRIDS_X,self.GRIDS_Y)
+
+	# drone' move is for sure. assume target move randomly
+	def getPossibility(self,state,action,nextState):
+		return 1.0/len(self.target.possibleActions(self.GRIDS_X,self.GRIDS_Y))
+
+	# get every possible next state and reward
+	def getNextStateAndReward(self,state,action):
+		self.drone.x, self.drone.y = state[0]
+		self.drone.AImove(action)
+		droneState = (self.drone.x, self.drone.y)
+		nextStates = []
+		rewards = []
+		for act in self.target.possibleActions(self.GRIDS_X,self.GRIDS_Y):
+			self.target.AImove(act)
+			self.computeValue()
+			reward = self.gridValue[self.drone.y][self.drone.x]
+			state = [droneState, (self.target.x,self.target.y), (self.target.face, self.target.faceAngle)]
+			nextStates.append(state)
+			rewards.append(reward)
+			self.target.undo()
+		self.drone.undo()
+		return nextStates,rewards
+
+	def moveAction(self,action):
+		print ('movemvoemvomeovmeovm')
+		self.iter += 1
+		self.drone.AImove(action)
+		self.targetMove()
+		self.updateGrid()
+
+	def getGrid(self):
+		return self.gridValue
+
+	def getExploredArea(self):
+		return self.drone.exploredSet
+
+
+	##################### SARS structure End#####################
+
+	
 
 
 game = Simulator2(10,10,20,20,20,False)
-# game.start()
-game.SARS()		
+#game.start()
+#game.simulation()
+
+#### EXAMPLE
+# to start real game and get SARS
+iters = 10
+for i in range(10):
+	print ('\niter: ', i, '\n')
+
+	state = game.getState()
+	print ('state: \n', state)
+
+	exploredSet = game.getExploredArea()
+	print ('explored area: \n', exploredSet)
+
+	gridValue = game.getGrid()
+	print ('value of grid: \n', gridValue )
+
+	possibleActions = game.getAction(state)
+	print ('possible actions: \n', possibleActions)	
+
+	for action in possibleActions:
+		print ('action: ', action)
+		nextState, reward = game.getNextStateAndReward(state,action)
+		print ('	reward, nextState: \n', reward, nextState)
+
+		probability = game.getPossibility(state,action,nextState)
+		print ('	probability: ', probability)
+
+	# action = random.choice(possibleActions)
+	action = input(">>> next action: ")
+	print ('take action: ', action)
+	game.moveAction(action)
+
 
 
 
