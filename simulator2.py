@@ -40,10 +40,15 @@ class Simulator2:
 		self.grid = [ [0 for x in range(grids_x)] for y in range(grids_y) ]
 		self.gridValue = np.asarray( [ [0 for x in range(self.GRIDS_X)] for y in range(self.GRIDS_Y) ] )
 		self.simulate = simulate
-		self.iter = 0
 		self.generateStartPoint()
 		self.updateGrid()
+		pygame.init()
+		clock = pygame.time.Clock()
+		clock.tick(60)
+		self.screen = self.canvas()
+		self.default_font = pygame.font.Font(None, 28)
 
+		
 	def generateObstacles(self):
 		obstacleSet = set()
 		# generate obstacles
@@ -132,7 +137,7 @@ class Simulator2:
  							color = self.GREEN
  						else:
  							color = self.RED
- 				pygame.draw.rect(screen,color,[DistLeft+self.offsetLeft,DistUp+self.offsetUp,self.WIDTH,self.HEIGHT])
+ 				pygame.draw.rect(self.screen,color,[DistLeft+self.offsetLeft,DistUp+self.offsetUp,self.WIDTH,self.HEIGHT])
 
 
 	def draw_text(self, text, font, surface, x, y, main_color, background_color=None):
@@ -145,17 +150,15 @@ class Simulator2:
 	def canvas(self):
 		windowSize = [ (self.GRIDS_X+self.MARGIN)*self.WIDTH+self.offsetLeft+self.offsetRight, (self.GRIDS_Y+self.MARGIN)*self.HEIGHT+self.offsetUp+self.offsetDown]
 		screen = pygame.display.set_mode(windowSize)
-		# Set title of screen
 		pygame.display.set_caption("Awesome drone")
-		# set up obstacles, drone and target
-		self.generateStartPoint()
+		# self.generateStartPoint()
 		return screen
 
 	def drawScore(self,screen,default_font,elapsed,timeEnd):
-		self.drawSquares(screen)
-		self.draw_text('points: {}'.format(self.score), default_font, screen,
+		self.drawSquares(self.screen)
+		self.draw_text('points: {}'.format(self.score), default_font, self.screen,
               (self.GRIDS_X+self.MARGIN)*self.WIDTH*1/5, 20, self.GREEN)
-		self.draw_text('time left: {}'.format(int(timeEnd-elapsed)), default_font, screen,
+		self.draw_text('time left: {}'.format(int(timeEnd-elapsed)), default_font, self.screen,
               (self.GRIDS_X+self.MARGIN)*self.WIDTH*4/5 , 20, self.GREEN)
 
 	#after every stuff move, update the information of grid and value of grid
@@ -204,41 +207,32 @@ class Simulator2:
 
 
 	def start(self):
-		pygame.init()
-		screen = self.canvas()
-		default_font = pygame.font.Font(None, 28)
-
 		start_time = time.time()
 		lastMoveTime = start_time
-		clock = pygame.time.Clock()
-		
+		# clock = pygame.time.Clock()
 		# Loop until the user clicks the close button.
 		done = False
 		while not done:
-			screen.fill(self.BLACK)
+			self.screen.fill(self.BLACK)
 			elapsed = time.time() - start_time
 			done = self.eventHandler()
-			self.drawScore(screen,default_font,elapsed,self.timeEnd) # draw
-			clock.tick(60) # Limit to 60 frames per second
+			self.drawScore(self.screen,self.default_font,elapsed,self.timeEnd) # draw
+			# clock.tick(60) # Limit to 60 frames per second
 			pygame.display.flip() # Go ahead and update the screen with what we've drawn.
-			print (self.getState()[0])
 			if elapsed > self.timeEnd:
 				print (self.score)
 				break
-			print (self.gridValue,'\n')
 		pygame.quit()
 
 
+	'''
 	def simulation(self):
-		pygame.init()
 		screen = self.canvas()
 		default_font = pygame.font.Font(None, 28)
 
 		start_time = time.time()
 		lastMoveTime = start_time
 		clock = pygame.time.Clock()
-		
-
 		# Loop until the user clicks the close button.
 		done = False
 		self.updateGrid()
@@ -272,10 +266,11 @@ class Simulator2:
 			self.targetMove()
 			self.updateGrid()
 
-
-			# print (self.gridValue,'\n')
 		pygame.quit()
-	
+		'''
+
+
+
 
 
 
@@ -313,7 +308,6 @@ class Simulator2:
 
 	def moveAction(self,action):
 		print ('movemvoemvomeovmeovm')
-		self.iter += 1
 		self.drone.AImove(action)
 		self.targetMove()
 		self.updateGrid()
@@ -323,6 +317,11 @@ class Simulator2:
 
 	def getExploredArea(self):
 		return self.drone.exploredSet
+
+	def drawCanvas(self):
+		self.screen.fill(self.BLACK)
+		self.drawScore(self.screen,self.default_font,0,0)
+		pygame.display.flip()
 
 
 	##################### SARS structure End#####################
@@ -334,11 +333,14 @@ game = Simulator2(10,10,20,20,20,False)
 #game.start()
 #game.simulation()
 
-#### EXAMPLE
+
 # to start real game and get SARS
+################ SARS EXAMPLE ###################
 iters = 10
 for i in range(10):
 	print ('\niter: ', i, '\n')
+	
+	game.drawCanvas()
 
 	state = game.getState()
 	print ('state: \n', state)
@@ -350,7 +352,7 @@ for i in range(10):
 	print ('value of grid: \n', gridValue )
 
 	possibleActions = game.getAction(state)
-	print ('possible actions: \n', possibleActions)	
+	print ('possible actions: \n', possibleActions) 
 
 	for action in possibleActions:
 		print ('action: ', action)
