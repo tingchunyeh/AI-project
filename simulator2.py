@@ -307,7 +307,6 @@ class Simulator2:
 		return nextStates,rewards
 
 	def moveAction(self,action):
-		print ('movemvoemvomeovmeovm')
 		self.drone.AImove(action)
 		self.targetMove()
 		self.updateGrid()
@@ -318,9 +317,9 @@ class Simulator2:
 	def getExploredArea(self):
 		return self.drone.exploredSet
 
-	def drawCanvas(self):
+	def drawCanvas(self,i,iters):
 		self.screen.fill(self.BLACK)
-		self.drawScore(self.screen,self.default_font,0,0)
+		self.drawScore(self.screen,self.default_font,i,iters)
 		pygame.display.flip()
 
 
@@ -340,7 +339,7 @@ iters = 10
 for i in range(10):
 	print ('\niter: ', i, '\n')
 	
-	game.drawCanvas()
+	game.drawCanvas(i,iters)
 
 	state = game.getState()
 	print ('state: \n', state)
@@ -354,14 +353,15 @@ for i in range(10):
 	possibleActions = game.getAction(state)
 	print ('possible actions: \n', possibleActions) 
 
+
 	for action in possibleActions:
-		print ('action: ', action)
-		nextState, reward = game.getNextStateAndReward(state,action)
-		print ('	reward, nextState: \n', reward, nextState)
-
-		probability = game.getPossibility(state,action,nextState)
-		print ('	probability: ', probability)
-
+				print ('	action:',action)
+				nextStates,rewards = game.getNextStateAndReward(state,action)
+				for nextState,reward in zip(nextStates,rewards):
+					probability = game.getPossibility(state,action,nextState)
+					print ('		nextState:',nextState,'; reward:',reward,'; probability: ', probability)
+	
+		
 	# action = random.choice(possibleActions)
 	action = input(">>> next action: ")
 	print ('take action: ', action)
