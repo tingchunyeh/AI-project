@@ -110,16 +110,19 @@ class Target:
 		return True
 
 	def possibleActions(self,GRIDS_X,GRIDS_Y):
-		if self.x >= GRIDS_X-1:
-			return ['west','north','south']
-		elif self.y >= GRIDS_Y-1:
-			return ['west','east','north']
-		elif self.x <= 0:
-			return ['north','east','south']
-		elif self.y <= 0:
-			return ['west','east','south']
-		else:
-			return ['west','east','south','north']
+		actions = []
+
+		if self.x < GRIDS_X-1:
+			actions.append('east')
+		if self.x > 0:
+			actions.append('west')
+		if self.y < GRIDS_Y-1:
+			actions.append('south')
+		if self.y > 0:
+			actions.append('north')
+
+		return actions
+		
 
 	def AImove(self,action):
 		self.lastX,self.lastY= self.x,self.y

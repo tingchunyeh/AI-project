@@ -291,6 +291,29 @@ class Simulator2:
 	def getPossibility(self,state,action,nextState):
 		return 1.0/len(self.target.possibleActions(self.GRIDS_X,self.GRIDS_Y))
 
+	# return [ nextState, reward, probability]
+	def getSuccessors(self,state,action):
+		self.drone.backUp()
+		self.drone.x, self.drone.y = state[0]
+		self.drone.AImove(action)
+		droneState = (self.drone.x, self.drone.y)
+		successors = []
+		nextStates = []
+		rewards = []
+		for act in self.target.possibleActions(self.GRIDS_X,self.GRIDS_Y):
+			self.target.AImove(act)
+			self.computeValue()
+			reward = self.gridValue[self.drone.y][self.drone.x]
+			nextState = [droneState, (self.target.x,self.target.y), (self.target.face, self.target.faceAngle)]
+			probability = self.getPossibility(state,action,nextState)
+			successor = [nextState, reward, probability]
+			successors.append(successor)
+			self.target.undo()
+		# self.drone.undo()
+		self.drone.recoverBackUp()
+		return successors
+
+
 	# get every possible next state and reward
 	def getNextStateAndReward(self,state,action):
 		self.drone.backUp()
@@ -340,42 +363,48 @@ class Simulator2:
 
 
 # game = Simulator2(10,10,20,20,20,False)
-#game.start()
-#game.simulation()
+# game.start()
+# game.simulation()
 
 # to start real game and get SARS
 ################ SARS EXAMPLE ###################
-# iters = 10
-# for i in range(10):
-# 	print ('\niter: ', i, '\n')
+game = Simulator2(10,10,20,20,20,False)
+iters = 10
+for i in range(10):
+	print ('\niter: ', i, '\n')
 	
-# 	game.drawCanvas(i,iters)
+	game.drawCanvas(i,iters)
 
-# 	state = game.getState()
-# 	print ('state: \n', state)
+	state = game.getState()
+	print ('state: \n', state)
 
-# 	exploredSet = game.getExploredArea()
-# 	print ('explored area: \n', exploredSet)
+	exploredSet = game.getExploredArea()
+	print ('explored area: \n', exploredSet)
 
-# 	gridValue = game.getGrid()
-# 	print ('value of grid: \n', gridValue )
+	gridValue = game.getGrid()
+	print ('value of grid: \n', gridValue )
 
-# 	possibleActions = game.getAction(state)
-# 	print ('possible actions: \n', possibleActions) 
+	possibleActions = game.getAction(state)
+	print ('possible actions: \n', possibleActions) 
 
+	
 
-# 	for action in possibleActions:
-# 				print ('	action:',action)
-# 				nextStates,rewards = game.getNextStateAndReward(state,action)
-# 				for nextState,reward in zip(nextStates,rewards):
-# 					probability = game.getPossibility(state,action,nextState)
-# 					print ('		nextState:',nextState,'; reward:',reward,'; probability: ', probability)
+	for action in possibleActions:
+		
+		print ('	action:',action)
+		successors = game.getSuccessors(state,action)
+		print ('successors are:\n', successors)
+
+		# nextStates,rewards = game.getNextStateAndReward(state,action)
+		# for nextState,reward in zip(nextStates,rewards):
+		# 	probability = game.getPossibility(state,action,nextState)
+		# 	print ('		nextState:',nextState,'; reward:',reward,'; probability: ', probability)
 	
 		
-# 	# action = random.choice(possibleActions)
-# 	action = input(">>> next action: ")
-# 	print ('take action: ', action)
-# 	game.moveAction(action)
+	# action = random.choice(possibleActions)
+	action = input(">>> next action: ")
+	print ('take action: ', action)
+	game.moveAction(action)
 
 
 
