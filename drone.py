@@ -10,8 +10,14 @@ class Drone:
 		self.y = y
 		self.lastX = x
 		self.lastY = y 
+		self.backX = x
+		self.backY = y
+		self.backLx = x
+		self.backLy = y
 		self.exploredSet = set()
 		self.lastExploration = set()
+		self.backExp = set()
+		self.backLexp = set()
 		self.expandExploration()
 
 	# according to keyboard input, move position
@@ -44,17 +50,30 @@ class Drone:
 		self.exploredSet = self.lastExploration
 
 	def possibleActions(self,GRIDS_X,GRIDS_Y):
-		if self.x >= GRIDS_X-1:
-			return ['west','north','south']
-		elif self.y >= GRIDS_Y-1:
-			return ['west','east','north']
-		elif self.x <= 0:
-			return ['north','east','south']
-		elif self.y <= 0:
-			return ['west','east','south']
-		else:
-			return ['west','east','south','north']
+		actions = []
 
+		if self.x < GRIDS_X-1:
+			actions.append('east')
+		if self.x > 0:
+			actions.append('west')
+		if self.y < GRIDS_Y-1:
+			actions.append('south')
+		if self.y > 0:
+			actions.append('north')
+
+		return actions
+
+	def backUp(self):
+		self.backX, self.bakcY = self.x, self.y
+		self.backExp = set(self.exploredSet)
+		self.backLx, self.backLy = self.lastX, self.lastY
+		self.backLexp = set(self.lastExploration)
+
+	def recoverBackUp(self):
+		self.x, self.y = self.backX, self.bakcY
+		self.exploredSet = set(self.backExp)
+		self.lastX, self.lastY = self.backLx, self.backLy
+		self.lastExploration = set(self.backLexp)
 
 	def AImove(self,action):
 		self.lastX = self.x
