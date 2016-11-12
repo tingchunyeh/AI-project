@@ -1,7 +1,7 @@
 from drone import Drone
 from target import Target
 from obstacle import Obstacle
-from simulator2 import Simulator2
+from game import Game
 import pygame
 from random import randint
 import numpy as np
@@ -146,7 +146,7 @@ def simulate(game, rl, numTrials=1, maxIterations=1000, verbose=False,
 
 
 ######################################################################################################
-game = Simulator2(10,10,20,20,20,False)
+game = Game(10,10,20,20,20,False)
 qlearning = QLearning(game.getAction, 0.9, identityFeatureExtractor, explorationProb=0.2)
 ######################################################################################################
 
