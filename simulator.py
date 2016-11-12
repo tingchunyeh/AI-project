@@ -23,7 +23,7 @@ def timesLimitedStart(timeEnd):
 
 def numbersLimitedStart(iters):
 
-	for i in range(iters):
+	for i in range(1,iters+1):
 		game.drawCanvas(i,iters)
 		action = True
 		while action:

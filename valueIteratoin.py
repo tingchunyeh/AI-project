@@ -81,42 +81,21 @@ print ('------------ VALUE ITERATION ------------\n')
 
 
 iters = 50
-
-for i in range(iters):
+for i in range(1,iters+1):
 	print ('\niter: ', i)
-	
 	game.drawCanvas(i,iters)
 
 	state = game.getState()
 	print ('state: \n', state)
 
-	# exploredSet = game.getExploredArea()
-	# print ('explored area: \n', exploredSet)
-
-	# gridValue = game.getGrid()
-	# print ('value of grid: \n', gridValue )
-
 	possibleActions = game.getAction(state)
 	print ('possible actions: \n', possibleActions) 
 
-
-	# for action in possibleActions:
-	# 			print ('	action:',action)
-	# 			nextStates,rewards = game.getNextStateAndReward(state,action)
-	# 			for nextState,reward in zip(nextStates,rewards):
-	# 				probability = game.getPossibility(state,action,nextState)
-	# 				print ('		nextState:',nextState,'; reward:',reward,'; probability: ', probability)
-	
 	# AI action
 	action = VI.getBestAction()
 	print ('take action: ',action)
 	game.moveAction(action)
 	# pause = input("press enter to next step")
-
-	# # Human action
-	# action = input(">>> next action: ")
-	# print ('take action: ', action)
-	# game.moveAction(action)
 		
 print (game.getScore())
 

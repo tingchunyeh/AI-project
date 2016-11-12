@@ -8,7 +8,7 @@ import time
 import random
 
 class Game:
-
+	
 	# Define some colors
 	BLACK = (0, 0, 0)
 	WHITE = (255, 255, 255)
