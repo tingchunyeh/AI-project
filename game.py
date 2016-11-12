@@ -19,12 +19,10 @@ class Game:
 	WALL_SCORE = -20
 	MARGIN = 1 # how long between each two squares
 	obstaclesLs = []
-	offsetUp = 40 + randint(40,80)# offset for space to show score and time on the top of canvas
-	offsetLeft = randint(40,80)
-	offsetRight = randint(40,80)
-	offsetDown = randint(40,80)
-	timePeriod = 0.5 # Used to manage how fast the screen updates
-	timeEnd = 30
+	offsetUp = 40 + randint(60,100)# offset for space to show score and time on the top of canvas
+	offsetLeft = randint(60,100)
+	offsetRight = randint(60,100)
+	offsetDown = randint(60,100)
 
 	# Initialize the setting of world
 	def __init__(self,grids_x=10,grids_y=10,grid_width=20,grid_height=20,obstaclesPer=20,simulate=False):
@@ -205,72 +203,26 @@ class Game:
 			self.updateGrid()
 		return False
 
-
-	def start(self):
-		start_time = time.time()
-		lastMoveTime = start_time
-		# clock = pygame.time.Clock()
-		# Loop until the user clicks the close button.
-		done = False
-		while not done:
-			self.screen.fill(self.BLACK)
-			elapsed = time.time() - start_time
-			done = self.eventHandler()
-			self.drawScore(self.screen,self.default_font,elapsed,self.timeEnd) # draw
-			# clock.tick(60) # Limit to 60 frames per second
-			pygame.display.flip() # Go ahead and update the screen with what we've drawn.
-			if elapsed > self.timeEnd:
-				print (self.score)
-				break
-		pygame.quit()
-
-
-	'''
-	def simulation(self):
-		screen = self.canvas()
-		default_font = pygame.font.Font(None, 28)
-
-		start_time = time.time()
-		lastMoveTime = start_time
-		clock = pygame.time.Clock()
-		# Loop until the user clicks the close button.
-		done = False
-		self.updateGrid()
-		while not done:
-			screen.fill(self.BLACK)
-			elapsed = time.time() - start_time
-			state = self.getState()
-			actions = self.getAction(state)
-			print ('state:',state)
-			print ('actions:',actions)
-			print (self.drone.x,self.drone.y)
-
-			for action in actions:
-				print ('	action:',action)
-				nextStates,rewards = self.getNextStateAndReward(state,action)
-				for nextState,reward in zip(nextStates,rewards):
-					print ('		nextState:',nextState,'; reward:',reward)
-
-			for event in pygame.event.get():
-				# If user clicked close
-				if event.type == pygame.QUIT:
-					done = True
-
-			print (self.drone.x,self.drone.y)
-			self.drawScore(screen,default_font,elapsed,self.timeEnd) # draw
-			clock.tick(60) # Limit to 60 frames per second
-			pygame.display.flip() # Go ahead and update the screen with what we've drawn.
-			nextAction =  input(">>> next action: ")
-			self.drone.AImove(nextAction)
-			print (self.drone.x,self.drone.y)
+	def eventWait(self):
+		# If user clicked close
+		event = pygame.event.wait()
+		
+		if event.type == pygame.KEYDOWN:
+			self.drone.controlMove(event)
+			if self.hitWall():
+				self.drone.undo()
+				self.score += self.WALL_SCORE
 			self.targetMove()
 			self.updateGrid()
+			return False
+		else:
+			self.updateGrid()
+			return True
 
-		pygame.quit()
-		'''
-
-
-
+	def drawCanvas(self,i,iters):
+		self.screen.fill(self.BLACK)
+		self.drawScore(self.screen,self.default_font,i,iters)
+		pygame.display.flip()
 
 
 
@@ -346,14 +298,8 @@ class Game:
 	def getExploredArea(self):
 		return self.drone.exploredSet
 
-	def drawCanvas(self,i,iters):
-		self.screen.fill(self.BLACK)
-		self.drawScore(self.screen,self.default_font,i,iters)
-		pygame.display.flip()
-
 	def getScore(self):
 		return self.score
-
 
 	##################### SARS structure End#####################
 
