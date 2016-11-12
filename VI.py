@@ -1,7 +1,7 @@
 from drone import Drone
 from target import Target
 from obstacle import Obstacle
-from simulator2 import Simulator2
+from game import Game
 import pygame
 import numpy as np
 import random
@@ -74,7 +74,7 @@ class ValueIteratoin:
 
 
 
-game = Simulator2(10,10,20,20,20,False)
+game = Game(10,10,20,20,20,False)
 VI = ValueIteratoin(game,0.001)
 
 print ('------------ VALUE ITERATION ------------\n')
