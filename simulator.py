@@ -1,12 +1,5 @@
-from drone import Drone
-from target import Target
-from obstacle import Obstacle
 from game import Game
 import pygame
-from random import randint
-import numpy as np
-import time
-import random
 
 game = Game(10,10,20,20,20,False)
 # game.start()
