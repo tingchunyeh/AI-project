@@ -112,7 +112,7 @@ class ValueIteratoin:
 
 
 
-game = Game(10,10,20,20,20,False)
+game = Game(10,10,20,20,20)
 VI = ValueIteratoin(game,0.001)
 
 # print ('------------ VALUE ITERATION ------------\n')
