@@ -269,7 +269,7 @@ class Game:
 	def getState(self):
 		return [(self.drone.x,self.drone.y),(self.target.x,self.target.y) ,( self.target.face, self.target.faceAngle)]
 
-	# get possible next action
+	# return possible next action
 	def getAction(self,state):
 		self.drone.backUp()
 		self.drone.x, self.drone.y = state[0]
@@ -277,7 +277,7 @@ class Game:
 		self.drone.recoverBackUp()
 		
 		return actions
-	# drone' move is for sure. assume target move randomly
+	# drone's move is for sure. assume target move randomly
 	def getPossibility(self,state,action,nextState):
 		return 1.0/len(self.target.possibleActions(self.GRIDS_X,self.GRIDS_Y))
 
@@ -324,19 +324,27 @@ class Game:
 		self.drone.recoverBackUp()
 		return nextStates,rewards
 
-
+	# move the drone and return the reward you get
 	def moveAction(self,action):
 		self.drone.AImove(action)
 		self.targetMove()
 		self.updateGrid()
 		return self.gridValue[self.drone.y][self.drone.x]
 
+	# return the reward at given state at current time
+	def getReward(self,state):
+		loc = state[0]
+		return self.gridValue[loc[1]][loc[0]]
+
+	# return gridValue which store all rewards at current time
 	def getGrid(self):
 		return self.gridValue
 
+	# return the region that drone already explored
 	def getExploredArea(self):
 		return self.drone.exploredSet
 
+	# return the cumulative score
 	def getScore(self):
 		return self.score
 
