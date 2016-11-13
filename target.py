@@ -7,23 +7,6 @@ class Target:
 	rewardRange = 2
 	maxReward = 10
 
-	##	Reward rule:
-	#				 0.7 0.8 	0.45  0.1 0.05
-	#				 0.9 1.0 	0.6   0.2 0.1
-	#				 0.9 1.0 <-target 0.2 0.1
-	#			     0.9 1.0    0.6   0.2 0.1
-	#				 0.7 0.8	0.45  0.1 0.05
-	# make reward matrix basd on assumption 
-	# which means target face west and face front 
-	rewardMatrix = [180,np.array([	[0.7, 0.8, 0.45, 0.2, 0.05],
-								[0.9, 1.0, 0.6,  0.2, 0.1],
-								[0.9, 1.0, -2, 0.2, 0.1],
-								[0.9, 1.0, 0.6,  0.2, 0.1],
-								[0.7, 0.8, 0.45, 0.1, 0.05],
-							],float)] # first 180 indicate degree
-	
-
-
 	def __init__(self,x,y):
 		self.x = x
 		self.y = y
@@ -33,7 +16,23 @@ class Target:
 		self.lastFaceAngle = 0
 		self.face = 180 # 4 possible condition( 0(face east),90(north), 180(west), 270(south))]
 		self.lastFace = 180
+		##	Reward rule:
+		#				 0.7 0.8 	0.45  0.1 0.05
+		#				 0.9 1.0 	0.6   0.2 0.1
+		#				 0.9 1.0 <-target 0.2 0.1
+		#			     0.9 1.0    0.6   0.2 0.1
+		#				 0.7 0.8	0.45  0.1 0.05
+		# make reward matrix basd on assumption 
+		# which means target face west and face front 
+		self.rewardMatrix = [180,np.array([	[0.7, 0.8, 0.45, 0.2, 0.05],
+											[0.9, 1.0, 0.6,  0.2, 0.1],
+											[0.9, 1.0, -2, 0.2, 0.1],
+											[0.9, 1.0, 0.6,  0.2, 0.1],
+											[0.7, 0.8, 0.45, 0.1, 0.05],
+										],float)] # first 180 indicate degree
+
 		self.rewardMatrix[1] = np.multiply(self.rewardMatrix[1],self.maxReward)
+	
 
 	# targer doesn'y move but instead look left or right
 	def moveFace(self):

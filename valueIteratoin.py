@@ -112,7 +112,7 @@ class ValueIteratoin:
 
 
 
-game = Game(10,10,20,20,20)
+game = Game(10,10,20,20,20,'obstaclesMap1.txt')
 VI = ValueIteratoin(game,0.001)
 
 # print ('------------ VALUE ITERATION ------------\n')

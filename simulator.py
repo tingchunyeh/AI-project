@@ -2,9 +2,11 @@ from game import Game
 import pygame
 import time
 
-game = Game(10,10,20,20,30,'obstaclesMap1.txt')
+
+
 
 def timesLimitedStart(timeEnd):
+	game = Game(10,10,20,20,30,'obstaclesMap1.txt')
 	start_time = time.time()
 	lastMoveTime = start_time
 	# Loop until the user clicks the close button.
@@ -18,11 +20,12 @@ def timesLimitedStart(timeEnd):
 		if elapsed > timeEnd:
 			print (game.score)
 			break
+	pygame.quit()
 
 # timesLimitedStart(30)
 
 def numbersLimitedStart(iters):
-
+	game = Game(10,10,20,20,30,'obstaclesMap1.txt')
 	for i in range(1,iters+1):
 		game.drawCanvas(i,iters)
 		action = True
@@ -32,7 +35,7 @@ def numbersLimitedStart(iters):
 	print (game.score)
 	pygame.quit()
 
-numbersLimitedStart(50)
+# numbersLimitedStart(50)
 
 
 
@@ -40,6 +43,7 @@ numbersLimitedStart(50)
 	############### SARS EXAMPLE ###################
 def SARSExample():
 	# to start real game and get SARS
+	game = Game(10,10,20,20,30,'obstaclesMap1.txt')
 	iters = 10
 	for i in range(iters):
 		print ('\niter: ', i, '\n')
@@ -70,4 +74,14 @@ def SARSExample():
 		print ('take action: ', action)
 		game.moveAction(action)
 	print (game.score)
+	pygame.quit()
+
+
+
+for i in range(2):
+	numbersLimitedStart(2)
+	pygame.quit()
+
+
+
 

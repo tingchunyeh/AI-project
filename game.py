@@ -18,14 +18,16 @@ class Game:
 	YELLOW = (225,225,0)
 	WALL_SCORE = -20
 	MARGIN = 1 # how long between each two squares
-	obstaclesLs = []
+	
 	offsetUp = 40 + randint(60,100)# offset for space to show score and time on the top of canvas
 	offsetLeft = randint(60,100)
 	offsetRight = randint(60,100)
 	offsetDown = randint(60,100)
+	
 
 	# Initialize the setting of world
 	def __init__(self,grids_x=10,grids_y=10,grid_width=20,grid_height=20,obstaclesPer=20,obstaclesMap=None):
+		
 		self.GRIDS_X = grids_x # how many squares in x direction
 		self.GRIDS_Y = grids_y # how many squares in y direction
 		self.WIDTH = grid_width # square width
@@ -37,6 +39,7 @@ class Game:
 		self.drone = None
 		self.target = None
 		self.obstaclesMap = obstaclesMap
+		self.obstaclesLs = [] 
 
 		self.generateStartPoint()
 		self.updateGrid()
@@ -45,7 +48,8 @@ class Game:
 		clock.tick(60)
 		self.screen = self.canvas()
 		self.default_font = pygame.font.Font(None, 28)
-		
+
+
 		
 	def generateObstacles(self):
 		self.obstacleSet = set()
@@ -136,7 +140,9 @@ class Game:
  						# print (row,col,self.grid[row][col])
  						color = self.WHITE
  						if self.target.isReward(col,row):
+
 		 					w = self.target.getReward(col,row)/self.target.maxReward
+		 					print (self.target.getReward(col,row),self.target.maxReward)
 		 					color = tuple(np.add(white,np.multiply(gradient,w)))
  					else:
  						if name is 'drone':
