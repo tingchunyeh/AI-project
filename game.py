@@ -48,11 +48,11 @@ class Game:
 		
 		
 	def generateObstacles(self):
-		obstacleSet = set()
+		self.obstacleSet = set()
 		# generate obstacles
-		while len(obstacleSet) < self.OBSTACLSNUM:
-			obstacleSet.add( (randint(0,self.GRIDS_X-1),randint(0,self.GRIDS_Y-1)) )
-		for ob in obstacleSet:
+		while len(self.obstacleSet) < self.OBSTACLSNUM:
+			self.obstacleSet.add( (randint(0,self.GRIDS_X-1),randint(0,self.GRIDS_Y-1)) )
+		for ob in self.obstacleSet:
 			x,y = ob[0],ob[1]
 			block = Obstacle(x,y)
 			self.obstaclesLs.append(block)
@@ -224,6 +224,31 @@ class Game:
 		self.drawScore(self.screen,self.default_font,i,iters)
 		pygame.display.flip()
 
+	# get every possible next state and reward
+	def getVisionLimitedNextStateAndReward(self,state,action):
+		self.drone.backUp()
+		self.drone.x, self.drone.y = state[0]
+		self.drone.AImove(action)
+		droneState = (self.drone.x, self.drone.y)
+		nextStates = []
+		rewards = []
+
+		for act in self.target.possibleActions(self.GRIDS_X,self.GRIDS_Y):
+			self.target.AImove(act)
+			self.computeValue()
+			reward = self.gridValue[self.drone.y][self.drone.x]
+
+			if (self.drone.x,self.drone.y) not in self.drone.backExp and \
+				(self.drone.x,self.drone.y) in self.obstacleSet:
+				reward += 50
+
+			state = [droneState, (self.target.x,self.target.y), (self.target.face, self.target.faceAngle)]
+			nextStates.append(state)
+			rewards.append(reward)
+			self.target.undo()
+		# self.drone.undo()
+		self.drone.recoverBackUp()
+		return nextStates,rewards
 
 
 
