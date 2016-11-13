@@ -25,7 +25,7 @@ class Game:
 	offsetDown = randint(60,100)
 
 	# Initialize the setting of world
-	def __init__(self,grids_x=10,grids_y=10,grid_width=20,grid_height=20,obstaclesPer=20,simulate=False):
+	def __init__(self,grids_x=10,grids_y=10,grid_width=20,grid_height=20,obstaclesPer=20,obstaclesMap=None):
 		self.GRIDS_X = grids_x # how many squares in x direction
 		self.GRIDS_Y = grids_y # how many squares in y direction
 		self.WIDTH = grid_width # square width
@@ -33,10 +33,10 @@ class Game:
 		self.OBSTACLSNUM = int(float(grids_x)*grids_y*obstaclesPer/100)# how many obstacles in the setting
 		self.grid = [ [0 for x in range(grids_x)] for y in range(grids_y) ]
 		self.gridValue = np.asarray( [ [0 for x in range(self.GRIDS_X)] for y in range(self.GRIDS_Y) ] )
-		self.simulate = simulate
 		self.score = 0
 		self.drone = None
 		self.target = None
+		self.obstaclesMap = obstaclesMap
 
 		self.generateStartPoint()
 		self.updateGrid()
@@ -50,14 +50,24 @@ class Game:
 	def generateObstacles(self):
 		self.obstacleSet = set()
 		# generate obstacles
-		while len(self.obstacleSet) < self.OBSTACLSNUM:
-			self.obstacleSet.add( (randint(0,self.GRIDS_X-1),randint(0,self.GRIDS_Y-1)) )
+		if self.obstaclesMap is not None:
+			map_ob = open(self.obstaclesMap, 'r')
+			for line in map_ob:
+				loc = line.split(',')
+				x,y = int(loc[0]),int(loc[1])
+				print (x,y)
+				self.obstacleSet.add( (x,y) )		
+		else:
+			while len(self.obstacleSet) < self.OBSTACLSNUM:
+				self.obstacleSet.add( (randint(0,self.GRIDS_X-1),randint(0,self.GRIDS_Y-1)) )
+		
 		for ob in self.obstacleSet:
 			x,y = ob[0],ob[1]
 			block = Obstacle(x,y)
 			self.obstaclesLs.append(block)
-			self.grid[y][x] = block
 
+			self.grid[y][x] = block
+			print( 'grid',x,y,self.grid[y][x] )
 	def generateDrone(self):
 		while True:
 			x,y=randint(0,self.GRIDS_X-1),randint(0,self.GRIDS_Y-1)
@@ -115,6 +125,7 @@ class Game:
 		gradient = np.subtract(yellow,white)
 		for row in range(self.GRIDS_Y):
  			for col in range(self.GRIDS_X):
+ 				# print (row,col,self.grid[row][col])
  				DistLeft = (self.MARGIN + self.WIDTH) * col + self.MARGIN
  				DistUp = (self.MARGIN + self.HEIGHT) * row + self.MARGIN
  				name = 'empty' if not self.grid[row][col] else self.grid[row][col].name
@@ -124,6 +135,7 @@ class Game:
 	 					color = self.GREEN
  				else:
  					if self.grid[row][col] == 0:
+ 						# print (row,col,self.grid[row][col])
  						color = self.WHITE
  						if self.target.isReward(col,row):
 		 					w = self.target.getReward(col,row)/self.target.maxReward
@@ -164,14 +176,18 @@ class Game:
 		# remove original location
 		target, drone = self.target, self.drone
 		# undo last move
+		# print (self.grid)
 		self.grid[target.lastY][target.lastX] = 0
 		self.grid[drone.lastY][drone.lastX] = 0
 
 		# rebuild obstacles
 		for obstacle in self.obstaclesLs:
-			self.grid[obstacle.lastY][obstacle.lastX] = 0
+			print (obstacle.y,obstacle.x,obstacle)
+			# self.grid[obstacle.lastY][obstacle.lastX] = 0
 			self.grid[obstacle.y][obstacle.x] = obstacle
+			print (self.grid,'\n')
 
+		# print (self.grid,'\n\n')
 		self.grid[target.y][target.x] = target # for Target
 		self.grid[drone.y][drone.x] = drone # for drone
 		self.computeValue() # compue grid value
@@ -312,10 +328,12 @@ class Game:
 		self.drone.recoverBackUp()
 		return nextStates,rewards
 
+
 	def moveAction(self,action):
 		self.drone.AImove(action)
 		self.targetMove()
 		self.updateGrid()
+		return self.gridValue[self.drone.y][self.drone.x]
 
 	def getGrid(self):
 		return self.gridValue

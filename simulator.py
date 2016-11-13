@@ -2,7 +2,7 @@ from game import Game
 import pygame
 import time
 
-game = Game(10,10,20,20,30,False)
+game = Game(10,10,20,20,30,'obstaclesMap1.txt')
 
 def timesLimitedStart(timeEnd):
 	start_time = time.time()
