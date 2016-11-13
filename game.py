@@ -55,7 +55,6 @@ class Game:
 			for line in map_ob:
 				loc = line.split(',')
 				x,y = int(loc[0]),int(loc[1])
-				print (x,y)
 				self.obstacleSet.add( (x,y) )		
 		else:
 			while len(self.obstacleSet) < self.OBSTACLSNUM:
@@ -65,9 +64,8 @@ class Game:
 			x,y = ob[0],ob[1]
 			block = Obstacle(x,y)
 			self.obstaclesLs.append(block)
-
 			self.grid[y][x] = block
-			print( 'grid',x,y,self.grid[y][x] )
+
 	def generateDrone(self):
 		while True:
 			x,y=randint(0,self.GRIDS_X-1),randint(0,self.GRIDS_Y-1)
