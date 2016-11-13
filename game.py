@@ -182,10 +182,8 @@ class Game:
 
 		# rebuild obstacles
 		for obstacle in self.obstaclesLs:
-			print (obstacle.y,obstacle.x,obstacle)
 			# self.grid[obstacle.lastY][obstacle.lastX] = 0
 			self.grid[obstacle.y][obstacle.x] = obstacle
-			print (self.grid,'\n')
 
 		# print (self.grid,'\n\n')
 		self.grid[target.y][target.x] = target # for Target
