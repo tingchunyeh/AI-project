@@ -2,14 +2,14 @@ import pygame
 class Drone:
 
 	name = 'drone'
-	
+
 	visionRange = 2
 
 	def __init__(self,x,y):
 		self.x = x
 		self.y = y
 		self.lastX = x
-		self.lastY = y 
+		self.lastY = y
 		self.backX = x
 		self.backY = y
 		self.backLx = x
@@ -31,7 +31,7 @@ class Drone:
 		if event.key == pygame.K_UP:
 			self.y -= 1
 		if event.key == pygame.K_DOWN:
-			self.y += 1	
+			self.y += 1
 		self.expandExploration()
 
 
@@ -88,11 +88,5 @@ class Drone:
 			self.y += 1
 		else:
 			None
+		#print (self.x,self.y)
 		self.expandExploration()
-		
-
-
-
-
-
-
