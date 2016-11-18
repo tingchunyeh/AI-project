@@ -142,7 +142,7 @@ class Game:
  						if self.target.isReward(col,row):
 
 		 					w = self.target.getReward(col,row)/self.target.maxReward
-		 					print (self.target.getReward(col,row),self.target.maxReward)
+		 					# print (self.target.getReward(col,row),self.target.maxReward)
 		 					color = tuple(np.add(white,np.multiply(gradient,w)))
  					else:
  						if name is 'drone':
@@ -232,6 +232,8 @@ class Game:
 				self.score += self.WALL_SCORE
 			self.targetMove()
 			self.updateGrid()
+			print (self.drone.x,self.drone.y)
+			print (self.getObstaclesAronud())
 			return False
 		else:
 			self.updateGrid()
@@ -353,6 +355,21 @@ class Game:
 	# return the cumulative score
 	def getScore(self):
 		return self.score
+
+	def getObstaclesAronud(self):
+		xStart = 0 if self.drone.x-2<0 else self.drone.x-2
+		xEnd = self.GRIDS_X-1 if self.drone.x+2>self.GRIDS_X-1 else self.drone.x+2
+		yStart = 0 if self.drone.y-2<0 else self.drone.y-2 
+		yEnd = self.GRIDS_Y-1 if self.drone.y+2>self.GRIDS_Y-1 else self.drone.y+2
+		obstaclesAround = []
+		print (xStart,xEnd,yStart,yEnd)
+		for x in range(xStart,xEnd+1):
+			for y in range(yStart,yEnd+1):
+				name = 'empty' if not self.grid[y][x] else self.grid[y][x].name
+				if name == 'obstacle':
+					distance = abs(x-self.drone.x)+abs(y-self.drone.y)
+					obstaclesAround.append([(x-self.drone.x,y-self.drone.y),distance])
+		return obstaclesAround
 
 	##################### SARS structure End#####################
 

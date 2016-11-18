@@ -6,7 +6,7 @@ import time
 
 
 def timesLimitedStart(timeEnd):
-	game = Game(10,10,20,20,30,'obstaclesMap1.txt')
+	game = Game(10,10,20,20,30,'./environment/obstaclesMap2.txt')
 	start_time = time.time()
 	lastMoveTime = start_time
 	# Loop until the user clicks the close button.
@@ -25,7 +25,7 @@ def timesLimitedStart(timeEnd):
 # timesLimitedStart(30)
 
 def numbersLimitedStart(iters):
-	game = Game(10,10,20,20,30,'obstaclesMap1.txt')
+	game = Game(10,10,20,20,30,'./environment/obstaclesMap2.txt')
 	for i in range(1,iters+1):
 		game.drawCanvas(i,iters)
 		action = True
@@ -43,7 +43,7 @@ def numbersLimitedStart(iters):
 	############### SARS EXAMPLE ###################
 def SARSExample():
 	# to start real game and get SARS
-	game = Game(10,10,20,20,30,'obstaclesMap1.txt')
+	game = Game(10,10,20,20,30,'./environment/obstaclesMap2.txt')
 	iters = 10
 	for i in range(iters):
 		print ('\niter: ', i, '\n')
@@ -78,8 +78,8 @@ def SARSExample():
 
 
 
-for i in range(2):
-	numbersLimitedStart(2)
+for i in range(10):
+	numbersLimitedStart(50)
 	pygame.quit()
 
 

@@ -7,6 +7,7 @@ import numpy as np
 import random
 import math
 import collections
+import time
 
 # I assumed that the drone already knew all the environment setting of game
 # so, I do value iteration every time(because the target can move) before doing next action
@@ -23,13 +24,15 @@ class ValueIteratoin:
 
 	gamma = 0.7
 
-	def __init__(self,game,convergeError):
+	def __init__(self,game,convergeError,asynchronous):
 		self.game = game
 		self.Us = collections.defaultdict(int)
+		self.nextUs = collections.defaultdict(int)
 		self.policy = {}
+		self.asynchronous = asynchronous
 		self.x = game.GRIDS_X
 		self.y = game.GRIDS_Y
-		self.convergeError = convergeError
+		self.convergeError = float(convergeError)*(1.-self.gamma)/self.gamma
 
 	def getBestAction(self):
 		state = game.getState()
@@ -44,9 +47,9 @@ class ValueIteratoin:
 				for y in range(self.y):
 					state = (x,y)
 					newVal = self.findMaxAction(state)
-					error = (newVal - self.Us[state])**2
+					error = max(error, abs(newVal - self.Us[state]) )
 					self.Us[state] = newVal
-			error = math.sqrt(error)
+			# error = math.sqrt(error)
 			# print ('error: ',error)
 		# for state,action in self.policy.items():
 		# 	print ('state: ',state,'; actoin: ',action,'; value',self.Us[state])
@@ -85,9 +88,17 @@ class ValueIteratoin:
 				for y in range(self.y):
 					state = (x,y)
 					newVal = self.findVisionLimitedMaxAction(state)
-					error = (newVal - self.Us[state])**2
-					self.Us[state] = newVal
-			error = math.sqrt(error)
+					error = max(error, abs(newVal - self.Us[state]) )
+
+					if self.asynchronous:
+						self.Us[state] = newVal
+					else:
+						self.nextUs[state] = newVal
+			if not self.asynchronous:
+				temp = self.Us
+				self.Us = self.nextUs
+				self.nextUs = temp
+
 	def findVisionLimitedMaxAction(self,state):
 		s = state
 		state = tuple([state,None,None])
@@ -112,11 +123,12 @@ class ValueIteratoin:
 
 
 
-game = Game(10,10,20,20,20,'obstaclesMap1.txt')
-VI = ValueIteratoin(game,0.001)
+
+
 
 # print ('------------ VALUE ITERATION ------------\n')
-
+# game = Game(10,10,20,20,20,'./environment/obstaclesMap2.txt')
+# VI = ValueIteratoin(game,0.001)
 
 # iters = 50
 # for i in range(1,iters+1):
@@ -139,28 +151,41 @@ VI = ValueIteratoin(game,0.001)
 
 
 
+
 print ('------------ VALUE ITERATION (vision limited) ------------\n')
 
+iters = 100
+scoreLs = []
+timeLs = []
 
-iters = 50
-for i in range(1,iters+1):
-	print ('\niter: ', i)
-	game.drawCanvas(i,iters)
+for t in range(10):
+	startTime = time.time()
+	game = Game(10,10,20,20,20,'./environment/obstaclesMap2.txt')
+	VI = ValueIteratoin(game,0.01,True)
+	for i in range(1,iters+1):
+		print ('iter ',t+1,":", i)
+		# game.drawCanvas(i,iters)
 
-	state = game.getState()
-	print ('state: \n', state)
+		state = game.getState()
+		# print ('state: \n', state)
 
-	possibleActions = game.getAction(state)
-	print ('possible actions: \n', possibleActions) 
+		possibleActions = game.getAction(state)
+		# print ('possible actions: \n', possibleActions) 
 
-	# AI action
-	action = VI.getVisionLimitedBestAction()
-	print ('take action: ',action)
-	game.moveAction(action)
-	print (game.gridValue)
-	pause = input("press enter to next step")
-	
-print (game.getScore())
+		# AI action
+		action = VI.getVisionLimitedBestAction()
+		# print ('take action: ',action)
+		game.moveAction(action)
+		# print (game.gridValue)
+		# pause = input("press enter to next step")
+	elapsedTime = time.time() - startTime
+	print ('score: ',game.getScore(),'; time: ',elapsedTime ,'s')
+	scoreLs.append(game.getScore())
+	timeLs.append(elapsedTime)
+
+print (scoreLs)
+print (timeLs)
+
 
 
 
