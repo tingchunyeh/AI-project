@@ -232,8 +232,6 @@ class Game:
 				self.score += self.WALL_SCORE
 			self.targetMove()
 			self.updateGrid()
-			print (self.drone.x,self.drone.y)
-			print (self.getObstaclesAronud())
 			return False
 		else:
 			self.updateGrid()
