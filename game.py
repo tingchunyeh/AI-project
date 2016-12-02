@@ -6,6 +6,7 @@ from random import randint
 import numpy as np
 import time
 import random
+import collections
 
 class Game:
 	
@@ -24,7 +25,7 @@ class Game:
 	offsetRight = randint(60,100)
 	offsetDown = randint(60,100)
 	
-
+	moveLs = collections.Counter()
 	# Initialize the setting of world
 	def __init__(self,grids_x=10,grids_y=10,grid_width=20,grid_height=20,obstaclesPer=20,obstaclesMap=None):
 		
@@ -49,7 +50,7 @@ class Game:
 		self.screen = self.canvas()
 		self.default_font = pygame.font.Font(None, 28)
 
-
+		self.moveLs = collections.Counter()
 		
 	def generateObstacles(self):
 		self.obstacleSet = set()
@@ -82,7 +83,7 @@ class Game:
 		while True:
 			x,y=randint(2,self.GRIDS_X-3),randint(2,self.GRIDS_Y-3)
 			if self.grid[y][x] == 0:
-				self.target = Target(x,y)
+				self.target = Target(x,y,True)
 				self.grid[y][x] = self.target
 				break
 
@@ -91,7 +92,7 @@ class Game:
 			self.gridValue[obstacle.y][obstacle.x] = obstacle.reward
 
 		
-	def computeTargetReward(self):
+	def computeTargetReward(self,gridValue):
 		target = self.target
 		rewardRange = target.rewardRange
 		x, y = self.target.x, self.target.y
@@ -105,13 +106,13 @@ class Game:
 			if row_grid < 0 or row_grid >=self.GRIDS_Y:	continue
 			for col_grid, col_reward in zip(range(startX,endX+1),range(2*rewardRange+1)):
 				if col_grid < 0 or col_grid >=self.GRIDS_X:	continue
-				self.gridValue[row_grid][col_grid] += rewardMatrix[row_reward][col_reward]
+				gridValue[row_grid][col_grid] += rewardMatrix[row_reward][col_reward]
 
 	def computeValue(self):
 		# calculate obstacle value
 		self.gridValue = np.asarray( [ [0 for x in range(self.GRIDS_X)] for y in range(self.GRIDS_Y) ] )
 		self.copmuteObstacleReward()
-		self.computeTargetReward()
+		self.computeTargetReward(self.gridValue)
 		
 	# randomly generate strat point on the grid for every stuff
 	def generateStartPoint(self):
@@ -201,9 +202,13 @@ class Game:
 			return True
 		else:
 			return False
-
+	'''
+	decide the preference move for target
+	'''
 	def targetMove(self):
-		self.target.randmove(self.GRIDS_X,self.GRIDS_Y)
+		a = self.target.move(self.GRIDS_X,self.GRIDS_Y)
+		# a = self.target.preferenceMove(self.GRIDS_X,self.GRIDS_Y)
+		self.moveLs[a] += 1
 		self.updateGrid()
 
 
@@ -268,6 +273,36 @@ class Game:
 		self.drone.recoverBackUp()
 		return nextStates,rewards
 
+	def getVisionLimitedSuccessors(self,state,action):
+		self.drone.backUp()
+		self.drone.x, self.drone.y = state[0]
+		self.drone.AImove(action)
+		droneState = (self.drone.x, self.drone.y)
+		successors = []
+		nextStates = []
+		rewards = []
+
+		for act in self.target.possibleActions(self.GRIDS_X,self.GRIDS_Y):
+			self.target.AImove(act)
+			self.computeValue()
+			reward = self.gridValue[self.drone.y][self.drone.x]
+
+			if (self.drone.x,self.drone.y) not in self.drone.backExp and \
+				(self.drone.x,self.drone.y) in self.obstacleSet:
+				reward += 50
+
+			nextState = [droneState, (self.target.x,self.target.y), (self.target.face, self.target.faceAngle)]
+			nextStates.append(nextState)
+			probability = self.getPossibility(state,action,nextState)
+			successor = [nextState, reward, probability]
+			successors.append(successor)
+			rewards.append(reward)
+			self.target.undo()
+		# self.drone.undo()
+		self.drone.recoverBackUp()
+		return successors
+
+
 
 
 	##################### SARS structure #####################
@@ -291,6 +326,10 @@ class Game:
 	def getSuccessors(self,state,action):
 		self.drone.backUp()
 		self.drone.x, self.drone.y = state[0]
+		self.target.backUp()
+		self.target.x, self.target.y = state[1]
+		self.target.face, self.target.faceAngle= state[2]
+
 		self.drone.AImove(action)
 		droneState = (self.drone.x, self.drone.y)
 		successors = []
@@ -307,6 +346,7 @@ class Game:
 			self.target.undo()
 		# self.drone.undo()
 		self.drone.recoverBackUp()
+		self.target.recoverBackUp()
 		return successors
 
 
@@ -368,6 +408,13 @@ class Game:
 					distance = abs(x-self.drone.x)+abs(y-self.drone.y)
 					obstaclesAround.append([(x-self.drone.x,y-self.drone.y),distance])
 		return obstaclesAround
+
+	# return reward matrix with assigned droneVal which indicate the location of drone
+	def getRewardMatrix(self,droneVal):
+		res = np.asarray( [ [0 for x in range(self.GRIDS_X)] for y in range(self.GRIDS_Y) ] )
+		self.computeTargetReward(res)
+		res[self.drone.y][self.drone.x] = droneVal
+
 
 	##################### SARS structure End#####################
 

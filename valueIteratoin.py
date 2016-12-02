@@ -22,9 +22,9 @@ import time
 
 class ValueIteratoin:
 
-	gamma = 0.7
+	
 
-	def __init__(self,game,convergeError,asynchronous):
+	def __init__(self,game,convergeError,asynchronous=True,gamma=0.7):
 		self.game = game
 		self.Us = collections.defaultdict(int)
 		self.nextUs = collections.defaultdict(int)
@@ -32,6 +32,7 @@ class ValueIteratoin:
 		self.asynchronous = asynchronous
 		self.x = game.GRIDS_X
 		self.y = game.GRIDS_Y
+		self.gamma = gamma
 		self.convergeError = float(convergeError)*(1.-self.gamma)/self.gamma
 
 	def getBestAction(self):
@@ -161,10 +162,10 @@ timeLs = []
 for t in range(10):
 	startTime = time.time()
 	game = Game(10,10,20,20,20,'./environment/obstaclesMap2.txt')
-	VI = ValueIteratoin(game,0.01,True)
+	VI = ValueIteratoin(game,0.01,True,0.7)
 	for i in range(1,iters+1):
 		print ('iter ',t+1,":", i)
-		# game.drawCanvas(i,iters)
+		game.drawCanvas(i,iters)
 
 		state = game.getState()
 		# print ('state: \n', state)

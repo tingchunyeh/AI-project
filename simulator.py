@@ -69,7 +69,7 @@ def SARSExample():
 			# for nextState,reward in zip(nextStates,rewards):
 			# 	probability = game.getPossibility(state,action,nextState)
 			# 	print ('		nextState:',nextState,'; reward:',reward,'; probability: ', probability)
-		
+		print game.getRewardMatrix(10000)
 		action = input(">>> next action: ")
 		print ('take action: ', action)
 		game.moveAction(action)
