@@ -89,7 +89,7 @@ class Game:
 
 	def copmuteObstacleReward(self):
 		for obstacle in self.obstaclesLs:
-			self.gridValue[obstacle.y][obstacle.x] = obstacle.reward
+			self.gridValue[obstacle.y][obstacle.x] += obstacle.reward
 
 		
 	def computeTargetReward(self,gridValue):
@@ -305,10 +305,26 @@ class Game:
 
 
 
+
+
+
 	##################### SARS structure #####################
 	# return state with location of drone and target [ droneLocation, targetLocatoin, face and faceangle ]
 	def getState(self):
 		return [(self.drone.x,self.drone.y),(self.target.x,self.target.y) ,( self.target.face, self.target.faceAngle)]
+
+	# state become [relative position from drone to target, target's face situation, relative position to obstacles within 2 block distance]
+	def getState2(self):
+		state = []
+		# relative position from drone to target
+		state.append((self.target.x-self.drone.x,self.target.y-self.drone.y))	
+		# target's face situation
+		state.append((self.target.face, self.target.faceAngle))
+		# relative position to obstacles within 2 block distance
+		for obstacle in self.obstaclesLs:
+			if abs(obstacle.y-self.drone.y)<=2 and abs(obstacle.x-self.drone.x)<=2:
+				state.append((obstacle.x-self.drone.x,obstacle.y-self.drone.y))
+		return state
 
 	# return possible next action
 	def getAction(self,state):
@@ -413,7 +429,12 @@ class Game:
 	def getRewardMatrix(self,droneVal):
 		res = np.asarray( [ [0 for x in range(self.GRIDS_X)] for y in range(self.GRIDS_Y) ] )
 		self.computeTargetReward(res)
+		for obstacle in self.obstaclesLs:
+			if abs(obstacle.y-self.drone.y)<=2 and abs(obstacle.x-self.drone.x)<=2:
+				res[obstacle.y][obstacle.x] += obstacle.reward
 		res[self.drone.y][self.drone.x] = droneVal
+		return res
+
 
 
 	##################### SARS structure End#####################
