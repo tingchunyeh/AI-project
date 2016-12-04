@@ -6,9 +6,7 @@ import time
 import sys
 import random
 import math
-
-
-
+from copy import copy
 ################################################################################################
 ################## Q Learning  #################################################################
 ################################################################################################
@@ -25,7 +23,6 @@ class QLearning(object):
         self.featureExtractor = featureExtractor
         self.explorationProb = explorationProb
         self.weights = defaultdict(float)
-        self.oldweights = defaultdict(float)
         self.numIters = 0
 
     # Return the Q function associated with the weights and features
@@ -56,15 +53,14 @@ class QLearning(object):
     # You should update the weights using self.getStepSize(); use
     # self.getQ() to compute the current estimate of the parameters.
 
-    def incorporateFeedback(self, state, action, reward, newState):
+    def incorporateFeedback(self, state, action, reward, newState, newAction):
         if (newState == None):
             return None
-        maxQ = max(self.getQ(newState, newAction) for newAction in self.actions(newState))
+        maxQ = self.getQ(newState, newAction)
         residual = reward + self.discount * maxQ - self.getQ(state, action)
         etaTimesR = residual * self.getStepSize()
         for f, v in self.featureExtractor(state, action):
             self.weights[f] += etaTimesR * v
-
 
 
 def identityFeatureExtractor(state, action):
@@ -72,23 +68,16 @@ def identityFeatureExtractor(state, action):
     featureValue = 1
     return [(featureKey, featureValue)]
 
-def disFeatureExtractor(state, action):
-    dis = math.fabs(state[0][0] - state[1][0]) + math.fabs(state[0][1] - state[1][1])
-    feature = []
-    #featureKey = (tuple(state), action)
-    #featureValue = 1
-    #feature.append((featureKey, featureValue))
-    if state[0][0] - state[1][0] > 0:
-    	feature.append(((action), 1))
-    if state[0][1] - state[1][1] > 0:
-    	feature.append(((action), 1))
-    if state[0][0] - state[1][0] < 0:
-    	feature.append(((action), 1))
-    if state[0][1] - state[1][1] < 0:
-    	feature.append(((action), 1))
 
-    return feature
-
+def decrease(d1, d2):
+    """
+    Implements d1 += scale * d2 for sparse vectors.
+    @param dict d1: the feature vector which is mutated.
+    @param float scale
+    @param dict d2: a feature vector.
+    """
+    for f, v in d2.items():
+        d1[f] = d1.get(f, 0) + v * (-1)
 
 def simulate(game, rl, numTrials=1, maxIterations=1000, drawCanvas=False,
              sort=False):
@@ -123,6 +112,7 @@ def simulate(game, rl, numTrials=1, maxIterations=1000, drawCanvas=False,
 
 	    # get action from Q-learning(explore OR exploit)
             action = rl.getAction(state)
+
 	
 	    # move in game
             reward = game.moveAction(action)
@@ -135,7 +125,9 @@ def simulate(game, rl, numTrials=1, maxIterations=1000, drawCanvas=False,
             sequence.append(newState)
 
 	    # Q-learning Algorithm
-            rl.incorporateFeedback(state, action, reward, newState)
+            newAction = rl.getAction(newState)
+
+            rl.incorporateFeedback(state, action, reward, newState, newAction)
 
 	    # Accumulate the reward
             totalReward +=  reward
@@ -145,13 +137,12 @@ def simulate(game, rl, numTrials=1, maxIterations=1000, drawCanvas=False,
 
 	    # update state
             state = newState
-    return (game.score)
-
+    return game.score
 
 ######################################################################################################
 game = Game(10,10,20,20,30,'obstaclesMap2.txt')
-StepLimitForGame = 100
-StepLmitForTrain = 500
+StepLimitForGame = 100 #100
+StepLmitForTrain = 500 #500
 featureExtractor = identityFeatureExtractor
 print('Not Yet Train')
 qlearning = QLearning(game.getAction, 0.9, featureExtractor, explorationProb=0.2)
@@ -196,5 +187,6 @@ def mean(numbers):
 print('Not Yet Train Score = ', NotTrainScore)
 print('Train Score = ', mean(scores), 'time(s)',mean(times))
 ######################################################################################################
+
 
 
