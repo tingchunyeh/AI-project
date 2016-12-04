@@ -305,7 +305,50 @@ class Game:
 
 
 
+	def faceApproximation(self,state):
+		targetPos = state[0]
+		res = 0
+		if abs(targetPos[0])<=3 and abs(targetPos[1])<=3:
+			res = sum(state[1])
+		return res
 
+	# local approximation of relative loaction of target from (-n~n,-m~m) to (-10~10,-10~10)
+	def targetApproximation(self,targetPos):
+		# maintain exactly same relative position within (-5~5,-5~5), it is close to drone which is important
+		# goal is to convert (-originalXRange~originalXRange,-originalYRange~originalYRange) to (-10~10,-10~10)
+		originalXRange = self.GRIDS_X
+		originalYRange = self.GRIDS_Y
+		# local approximation for x
+		if abs(targetPos[0])<=5:
+			newX = targetPos[0]
+		else:
+			newX = 6 if targetPos[0]>0 else -6
+		# local approximation for y
+		if abs(targetPos[1])<=5:
+			newY = targetPos[1]
+		else:
+			newY = 6 if targetPos[1]>0 else -6
+		return (round(newX),round(newY))
+	
+	# local approximate of location of obstacles from 5*5 to 3*3
+	def obstacleApproximation(self,obstaclePos):
+		# local approximation for x
+		if obstaclePos[0]<0:
+			newX = -1
+		elif obstaclePos[0]==0:
+			newX = 0
+		else:
+			newX = 1
+
+		# local approximation for y
+		if obstaclePos[1]<0:
+			newY = -1
+		elif obstaclePos[1]==0:
+			newY = 0
+		else:
+			newY = 1
+
+		return(newX,newY)
 
 
 	##################### SARS structure #####################
@@ -325,6 +368,18 @@ class Game:
 			if abs(obstacle.y-self.drone.y)<=2 and abs(obstacle.x-self.drone.x)<=2:
 				state.append((obstacle.x-self.drone.x,obstacle.y-self.drone.y))
 		return state
+
+	def getLocalApporximationState(self):
+		state = self.getState2()
+		newState = []
+		newState.append(self.targetApproximation(state[0]))
+		newState.append(self.faceApproximation(state))
+		for i in range(2,len(state)):
+			newPos = self.obstacleApproximation(state[i])
+			if newPos not in newState:
+				newState.append(newPos)
+
+		return newState
 
 	# return possible next action
 	def getAction(self,state):

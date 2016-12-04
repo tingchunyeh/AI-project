@@ -69,18 +69,17 @@ def SARSExample():
 			# for nextState,reward in zip(nextStates,rewards):
 			# 	probability = game.getPossibility(state,action,nextState)
 			# 	print ('		nextState:',nextState,'; reward:',reward,'; probability: ', probability)
-		print game.getRewardMatrix(10000)
+		print ('value of grid:', game.getRewardMatrix(1))
 		action = input(">>> next action: ")
 		print ('take action: ', action)
 		game.moveAction(action)
 	print (game.score)
 	pygame.quit()
 
-
-
-for i in range(10):
-	numbersLimitedStart(50)
-	pygame.quit()
+SARSExample()
+# for i in range(10):
+# 	numbersLimitedStart(50)
+# 	pygame.quit()
 
 
 
