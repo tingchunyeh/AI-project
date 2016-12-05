@@ -9,7 +9,7 @@ import random
 import collections
 
 class Game:
-	
+
 	# Define some colors
 	BLACK = (0, 0, 0)
 	WHITE = (255, 255, 255)
@@ -19,16 +19,16 @@ class Game:
 	YELLOW = (225,225,0)
 	WALL_SCORE = -20
 	MARGIN = 1 # how long between each two squares
-	
+
 	offsetUp = 40 + randint(60,100)# offset for space to show score and time on the top of canvas
 	offsetLeft = randint(60,100)
 	offsetRight = randint(60,100)
 	offsetDown = randint(60,100)
-	
+
 	moveLs = collections.Counter()
 	# Initialize the setting of world
 	def __init__(self,grids_x=10,grids_y=10,grid_width=20,grid_height=20,obstaclesPer=20,obstaclesMap=None):
-		
+
 		self.GRIDS_X = grids_x # how many squares in x direction
 		self.GRIDS_Y = grids_y # how many squares in y direction
 		self.WIDTH = grid_width # square width
@@ -40,7 +40,7 @@ class Game:
 		self.drone = None
 		self.target = None
 		self.obstaclesMap = obstaclesMap
-		self.obstaclesLs = [] 
+		self.obstaclesLs = []
 
 		self.generateStartPoint()
 		self.updateGrid()
@@ -51,7 +51,7 @@ class Game:
 		self.default_font = pygame.font.Font(None, 28)
 
 		self.moveLs = collections.Counter()
-		
+
 	def generateObstacles(self):
 		self.obstacleSet = set()
 		# generate obstacles
@@ -60,11 +60,11 @@ class Game:
 			for line in map_ob:
 				loc = line.split(',')
 				x,y = int(loc[0]),int(loc[1])
-				self.obstacleSet.add( (x,y) )		
+				self.obstacleSet.add( (x,y) )
 		else:
 			while len(self.obstacleSet) < self.OBSTACLSNUM:
 				self.obstacleSet.add( (randint(0,self.GRIDS_X-1),randint(0,self.GRIDS_Y-1)) )
-		
+
 		for ob in self.obstacleSet:
 			x,y = ob[0],ob[1]
 			block = Obstacle(x,y)
@@ -91,7 +91,7 @@ class Game:
 		for obstacle in self.obstaclesLs:
 			self.gridValue[obstacle.y][obstacle.x] += obstacle.reward
 
-		
+
 	def computeTargetReward(self,gridValue):
 		target = self.target
 		rewardRange = target.rewardRange
@@ -113,7 +113,7 @@ class Game:
 		self.gridValue = np.asarray( [ [0 for x in range(self.GRIDS_X)] for y in range(self.GRIDS_Y) ] )
 		self.copmuteObstacleReward()
 		self.computeTargetReward(self.gridValue)
-		
+
 	# randomly generate strat point on the grid for every stuff
 	def generateStartPoint(self):
 		self.generateObstacles()
@@ -229,7 +229,7 @@ class Game:
 	def eventWait(self):
 		# If user clicked close
 		event = pygame.event.wait()
-		
+
 		if event.type == pygame.KEYDOWN:
 			self.drone.controlMove(event)
 			if self.hitWall():
@@ -329,7 +329,7 @@ class Game:
 		else:
 			newY = 6 if targetPos[1]>0 else -6
 		return (round(newX),round(newY))
-	
+
 	# local approximate of location of obstacles from 5*5 to 3*3
 	def obstacleApproximation(self,obstaclePos):
 		# local approximation for x
@@ -360,7 +360,7 @@ class Game:
 	def getState2(self):
 		state = []
 		# relative position from drone to target
-		state.append((self.target.x-self.drone.x,self.target.y-self.drone.y))	
+		state.append((self.target.x-self.drone.x,self.target.y-self.drone.y))
 		# target's face situation
 		state.append((self.target.face, self.target.faceAngle))
 		# relative position to obstacles within 2 block distance
@@ -387,7 +387,7 @@ class Game:
 		self.drone.x, self.drone.y = state[0]
 		actions = self.drone.possibleActions(self.GRIDS_X,self.GRIDS_Y)
 		self.drone.recoverBackUp()
-		
+
 		return actions
 	# drone's move is for sure. assume target move randomly
 	def getPossibility(self,state,action,nextState):
@@ -468,10 +468,10 @@ class Game:
 	def getObstaclesAronud(self):
 		xStart = 0 if self.drone.x-2<0 else self.drone.x-2
 		xEnd = self.GRIDS_X-1 if self.drone.x+2>self.GRIDS_X-1 else self.drone.x+2
-		yStart = 0 if self.drone.y-2<0 else self.drone.y-2 
+		yStart = 0 if self.drone.y-2<0 else self.drone.y-2
 		yEnd = self.GRIDS_Y-1 if self.drone.y+2>self.GRIDS_Y-1 else self.drone.y+2
 		obstaclesAround = []
-		print (xStart,xEnd,yStart,yEnd)
+		#print (xStart,xEnd,yStart,yEnd)
 		for x in range(xStart,xEnd+1):
 			for y in range(yStart,yEnd+1):
 				name = 'empty' if not self.grid[y][x] else self.grid[y][x].name
@@ -493,12 +493,3 @@ class Game:
 
 
 	##################### SARS structure End#####################
-
-	
-
-
-
-
-
-
-
