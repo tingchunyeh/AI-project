@@ -109,7 +109,7 @@ def calculate_loss(model):
     a1 = np.tanh(z1)
     z2 = a1.dot(W2) + b2
 
-    z2 = z2 - np.amax(z2)
+    z2 = z2 - np.amax(z2) + 0.00000001
     #print (np.amax(z2))
 
     exp_scores = np.exp(z2)
@@ -143,22 +143,25 @@ def predict(model, x):
     #print("a1", a1)
     z2 = a1.dot(W2) + b2
     #print("z2 before",z2)
-    z2 = z2 - np.amax(z2)
+    z2 = z2 - np.amax(z2) + 0.00000001
     #print("z2 after",z2)
     exp_scores = np.exp(z2)
+    #print ("exp_scores before", exp_scores)
     exp_scores[exp_scores == 0] = 0.00000001
-
+    #print ("exp_scores after", exp_scores)
     probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
-    #print (probs)
+    #print ("probs", probs)
     #return np.argmax(probs, axis=1)
-
+    #print ("sorted",probs.argsort()[-4:][::-1])
+    #while 1:
+    #    a=1
     return probs.argsort()[-4:][::-1]
 
 # This function learns parameters for the neural network and returns the model.
 # - nn_hdim: Number of nodes in the hidden layer
 # - num_passes: Number of passes through the training data for gradient descent
 # - print_loss: If True, print the loss every 1000 iterations
-def build_model(nn_hdim, X, y, num_passes=2000, print_loss=False):
+def build_model(nn_hdim, X, y, num_passes=20000, print_loss=False):
 
     num_examples = X.shape[0] # training set size
 
@@ -189,7 +192,7 @@ def build_model(nn_hdim, X, y, num_passes=2000, print_loss=False):
         # print("z2 shape", z2.shape)
         #print("z2 before",z2)
 
-        z2 = z2 - np.amax(z2)
+        z2 = z2 - np.amax(z2) + 0.00000001
         #print("z2 after",z2)
 
         #print (np.amax(z2))
@@ -275,9 +278,9 @@ if training:
     # gather data
     for item in nn.q_dict:
         state = item[0]
-        if nn.q_dict.get(item)[0] > 0.0:
+        if nn.q_dict.get(item)[0] != 0.0:
 
-            bestAction = item[1]#nn.getBestAction(state)
+            bestAction = nn.getBestAction(state)
             #print(list(state))
             dataIn = [state[0][0], state[0][1], state[1][0], state[1][1], state[2][0]]
             #print (data)
@@ -426,6 +429,8 @@ else:
 
             #print ('\niter: ', i)
             #game.drawCanvas(i,gameStepLimit)
+
+            #print(model)
 
             state = game.getState()
             #print ('state: \n', state)
