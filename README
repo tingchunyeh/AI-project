@@ -1,0 +1,21 @@
+For all the files for the algorithms, each contain their own training and testing methods.
+
+Drone.py: Class for drone
+forwardSearch.py: Do forward search including heuristic evaluation function and local approximation evaluation function with simulated game in real time
+Game.py: game simulator
+Montecarlo.py: Do MonteCarlo with simulated game in real time
+monteCarloEval.py: Use MonteCarlo result as evaluation function
+Neural.py: Use neural network with simulated game
+Obstacle.py: Class for obstacles
+QLearning.py: Do QLearning including local and global approximation with simulated game in real time
+Sarsa.py: Do SARSA with simulated game in real time
+Simulator.py: Example for how to play game
+Target.py: Class for target
+valueIteration.py: Do value iteration with simulated game in real time
+
+Run commands:
+python <algorithm.py>
+
+Choose from the following algorithms to run: forwardSearch, montecarlo, neural, QLearning, Sarsa, valueIteration
+In each algorithm, you can set parameters and different mode in each py file
+And each file has their own training and testing methods.
