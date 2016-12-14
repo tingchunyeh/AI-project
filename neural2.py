@@ -122,22 +122,29 @@ def calculate_loss(model):
 def predict(model, x):
     W1, b1, W2, b2 = model['W1'], model['b1'], model['W2'], model['b2']
     # Forward propagation
+    print("W1 shape", W1.shape)
+    print("b1 shape", b1.shape)
+    print("W2 shape", W2.shape)
+    print("b2 shape", b2.shape)
+
+    print ("x", x)
+    print("x shape", x.shape)
     z1 = x.dot(W1) + b1
-    #print("z1", z1)
+    print("z1", z1)
     a1 = np.tanh(z1)
-    #print("a1", a1)
+    print("a1", a1)
     z2 = a1.dot(W2) + b2
-    #print("z2 before",z2)
+    print("z2 before",z2)
     z2 = z2 - np.amax(z2) + 0.00000001
-    #print("z2 after",z2)
+    print("z2 after",z2)
     exp_scores = np.exp(z2)
-    #print ("exp_scores before", exp_scores)
+    print ("exp_scores before", exp_scores)
     exp_scores[exp_scores == 0] = 0.00000001
-    #print ("exp_scores after", exp_scores)
+    print ("exp_scores after", exp_scores)
     probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
-    #print ("probs", probs)
+    print ("probs", probs)
     #return np.argmax(probs, axis=1)
-    #print ("sorted",probs.argsort()[-4:][::-1])
+    print ("sorted",probs.argsort()[-4:][::-1])
     #while 1:
     #    a=1
     return probs.argsort()[-4:][::-1]
@@ -146,7 +153,7 @@ def predict(model, x):
 # - nn_hdim: Number of nodes in the hidden layer
 # - num_passes: Number of passes through the training data for gradient descent
 # - print_loss: If True, print the loss every 1000 iterations
-def build_model(nn_hdim, X, y, num_passes=20000, print_loss=False):
+def build_model(nn_hdim, X, y, num_passes=2000, print_loss=False):
 
     num_examples = X.shape[0] # training set size
 
@@ -204,7 +211,10 @@ def build_model(nn_hdim, X, y, num_passes=20000, print_loss=False):
 
         dW2 = (a1.T).dot(delta3)
         db2 = np.sum(delta3, axis=0, keepdims=True)
+        #print("z1",z1)
+        #print("dd3",delta3.dot(W2.T))
         delta2 = delta3.dot(W2.T) * (1 - np.power(a1, 2))
+        #delta2 = delta3.dot(W2.T) * (1 - z1) * (1 + z1)
         dW1 = np.dot(X.T, delta2)
         db1 = np.sum(delta2, axis=0)
 
@@ -253,46 +263,44 @@ def isObsMove(action, obs):
         return False
 
 ######################################################################################################
-training = False
+training = True
 game = Game(10,10,20,20,30,'obstaclesMap2.txt')
 nn = neural(game)
+trainDict = {}
 ######################################################################################################
 if training:
     print('Training...')
-    nn.q_dict = np.load('neuralModel.npy').item()
+    trainDict = np.load('actionDict.npy').item()
 
     # gather data
-    for item in nn.q_dict:
-        state = item[0]
-        if nn.q_dict.get(item)[0] != 0.0:
+    for item in trainDict:
+        bestAction = trainDict[item]
+        #print(list(state))
+        dataIn = [item[0][0], item[0][1], item[1][0], item[1][1], item[2][0]]
+        #print (data)
+        nn.neuralData_input.append(dataIn)
+        #print (max(dataIn))
 
-            bestAction = nn.getBestAction(state)
-            #print(list(state))
-            dataIn = [state[0][0], state[0][1], state[1][0], state[1][1], state[2][0]]
-            #print (data)
-            nn.neuralData_input.append(dataIn)
-            #print (max(dataIn))
-    ########## old
-            dataOut = (0,0,0,0)
-            if bestAction == "east":
-                dataOut = (1,0,0,0)
-            elif bestAction =="south":
-                dataOut = (0,1,0,0)
-            elif bestAction =="west":
-                dataOut = (0,0,1,0)
-            elif bestAction =="north":
-                dataOut = (0,0,0,1)
-            #print list(dataOut)
-            #print (state)
-            #while 1:
-        #        a=1
-            nn.neuralData_output.append(list(dataOut))
+        dataOut = (0,0,0,0)
+        if bestAction == "east":
+            dataOut = (1,0,0,0)
+        elif bestAction =="south":
+            dataOut = (0,1,0,0)
+        elif bestAction =="west":
+            dataOut = (0,0,1,0)
+        elif bestAction =="north":
+            dataOut = (0,0,0,1)
+        #print list(dataOut)
+        #print (state)
+
+        nn.neuralData_output.append(list(dataOut))
 
     X = np.asarray(nn.neuralData_input)
     #print (X)
-
+    print("x shape", X.shape)
     # output dataset
     y = np.array(nn.neuralData_output)
+    print("y shape", y.shape)
     num_examples = X.shape[0] # training set size
     #print (num_examples)
 
@@ -325,7 +333,7 @@ if training:
     #  [0 0 1 0]
     #  [0 1 0 0]]
 
-    np.save('neuralModel.npy', model)
+    np.save('neuralModel_qLearn.npy', model)
 
     # Plot the decision boundary
     #plot_decision_boundary(lambda x: predict(model, x))
@@ -365,7 +373,7 @@ if training:
 ######################################################################################################
 else:
     print("Testing...")
-    model = np.load('neuralModel.npy').item()
+    model = np.load('neuralModel_qLearn.npy').item()
 
     numOfGames = 100
     gameStepLimit = 100
